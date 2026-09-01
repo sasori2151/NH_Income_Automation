@@ -158,22 +158,23 @@ def login(session, username, password):
         'Origin': 'https://kageherostudio.com',
     }
 
-    # Login
     r = session.post(LOGIN_URL, data=data, headers=headers, allow_redirects=True)
 
-    # Cek apakah muncul pesan error
-    if 'Invalid userid' in r.text or 'Invalid password' in r.text:
+    print(f"DEBUG {username} | URL: {r.url}")
+    print(f"DEBUG {username} | Status: {r.status_code}")
+    print(f"DEBUG {username} | Text contains Invalid: {'Invalid' in r.text}")
+
+    if 'Invalid userid' in r.text or 'Invalid password' in r.text or 'Invalid userid / password' in r.text:
         return False
 
-    # Coba akses halaman Ninja Income
     check = session.get(EVENT_URL, headers=headers)
+    print(f"DEBUG {username} | Event page has Logout: {'Logout' in check.text}")
+    print(f"DEBUG {username} | Event page has LOGIN COUNT: {'LOGIN COUNT' in check.text}")
 
-    # Kalau berhasil login, biasanya ada kata "Logout" atau "User ID" atau "LOGIN COUNT"
     if any(x in check.text for x in ['Logout', 'User ID', 'LOGIN COUNT', 'Ninja Income']):
         return True
 
     return False
-
 
 if __name__ == '__main__':
     os.system('cls' if SYSTEM == 'Windows' else 'clear')
