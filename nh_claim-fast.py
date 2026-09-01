@@ -149,20 +149,28 @@ def login(session, username, password):
     data = {
         USER_NAME: username,
         PASS_NAME: password,
+        'txtfrom': '',
     }
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-        'Referer': 'https://kageherostudio.com/',
+        'Referer': 'https://kageherostudio.com/payment',
         'Origin': 'https://kageherostudio.com',
     }
 
+    # Login
     r = session.post(LOGIN_URL, data=data, headers=headers, allow_redirects=True)
 
-    if 'pembayaran' in r.url or 'event' in r.url or 'payment' in r.url or r.status_code == 200:
-        check = session.get(EVENT_URL, headers=headers)
-        if 'Logout' in check.text or 'User ID' in check.text:
-            return True
+    # Cek apakah muncul pesan error
+    if 'Invalid userid' in r.text or 'Invalid password' in r.text:
+        return False
+
+    # Coba akses halaman Ninja Income
+    check = session.get(EVENT_URL, headers=headers)
+
+    # Kalau berhasil login, biasanya ada kata "Logout" atau "User ID" atau "LOGIN COUNT"
+    if any(x in check.text for x in ['Logout', 'User ID', 'LOGIN COUNT', 'Ninja Income']):
+        return True
 
     return False
 
