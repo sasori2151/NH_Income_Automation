@@ -151,9 +151,20 @@ def login(session, username, password):
         PASS_NAME: password,
     }
 
-    r = session.post(LOGIN_URL, data=data)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+        'Referer': 'https://kageherostudio.com/',
+        'Origin': 'https://kageherostudio.com',
+    }
 
-    return r.url.endswith('pembayaran.php')
+    r = session.post(LOGIN_URL, data=data, headers=headers, allow_redirects=True)
+
+    if 'pembayaran' in r.url or 'event' in r.url or 'payment' in r.url or r.status_code == 200:
+        check = session.get(EVENT_URL, headers=headers)
+        if 'Logout' in check.text or 'User ID' in check.text:
+            return True
+
+    return False
 
 
 if __name__ == '__main__':
